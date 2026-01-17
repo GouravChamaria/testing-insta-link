@@ -32,59 +32,52 @@ document.addEventListener("DOMContentLoaded", () => {
         const os = getMobileOS();
 
         if (os === "Android") {
-            // Android Strategy: Intent Scheme
-            // chrome://view-http-date/ is one way, but intent:// is more standard
-            // We want to open chrome with the current URL
-            
-            // Format: intent://<url>#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=<url>;end
-            // We strip the https:// from the start for the intent host part if needed, 
-            // but standard intent scheme usually takes the full url as path or encoded.
-            
-            // Simpler Intent approach for "Open in ANY browser":
-            // intent:<url>#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end
-            
-            // cleaning the protocol for the host part isn't strictly necessary if we use full structure
-            // But let's use the robust method:
+            // Android Strategy: Generic Intent
+            // This allows the user to choose their browser or uses the default one
+            // We removed 'package=com.android.chrome' to allow any browser
             
             const cleanUrl = currentUrl.replace(/^https?:\/\//, '');
             const scheme = currentUrl.startsWith('http:') ? 'http' : 'https';
             
-            // This intent tries to open in Chrome specifically, falling back to default browser
-            const intentUrl = `intent://${cleanUrl}#Intent;scheme=${scheme};package=com.android.chrome;end`;
+            // Standard Intent to VIEW data. 
+            // S.browser_fallback_url ensures that if the intent fails, it stays on the page (or we can redirect)
+            // scheme=https usually triggers the browser selection if currently in a webview
             
-            // Generalized Browser Intent (if specific package fails or we want user choice)
-            // const intentUrlGeneral = `intent://${cleanUrl}#Intent;scheme=${scheme};action=android.intent.action.VIEW;end`;
-
+            const intentUrl = `intent://${cleanUrl}#Intent;scheme=${scheme};action=android.intent.action.VIEW;S.browser_fallback_url=${currentUrl};end`;
+            
             // Auto-redirect attempt
             window.location.href = intentUrl;
             
-            // Fallback button click
+            // Fallback button click - re-trigger the intent
             breakoutBtn.onclick = () => {
                 window.location.href = intentUrl;
             };
             
-        } else if (os === "iOS") {
-            // iOS Strategy: 
-            // Apple blocks most automatic redirects. 
-            // googlechrome:// is a known scheme.
-            
-            const cleanUrl = currentUrl.replace(/^https?:\/\//, '');
-            const chromeScheme = `googlechrome://${cleanUrl}`;
-            const safariScheme = `x-safari-${currentUrl}`; // Sometimes works for basic shortcuts
-            
-            // We can Try to redirect to chrome if installed
-            // But usually this fails silently or prompts.
-            // Best UX is to tell them to use the menu, but we can attach a "Try Open" button
-            
-            breakoutBtn.innerHTML = "Open in Chrome (if installed)";
-            breakoutBtn.onclick = () => {
-                window.location.href = chromeScheme;
-            };
-            
         } else {
-            // Generic fallback
-            breakoutBtn.onclick = () => {
+            // iOS & Others Strategy
+            // Apple blocks automatic redirects to other apps from WebViews usually.
+            // We can try valid schemes, but the Overlay instruction is key.
+            
+            // Try to open in a new window context which sometimes breaks out or prompts
+            breakoutBtn.innerHTML = "Open in System Browser";
+            
+            breakoutBtn.onclick = (e) => {
+                e.preventDefault();
+                // 1. Try generic window.open (basic attempt)
                 window.open(currentUrl, '_system');
+                
+                // 2. Refresh prompt logic - sometimes reloading helps signal the intent
+                // But mainly we rely on the user following the arrow to the menu.
+                
+                // Optional: Attempt Chrome scheme as a 'nice to have' if they clicked the button
+                // but don't force it automatically on load to avoid error dialogs.
+                const cleanUrl = currentUrl.replace(/^https?:\/\//, '');
+                const chromeScheme = `googlechrome://${cleanUrl}`;
+                
+                // We utilize a small timeout to try chrome, then fallback
+                setTimeout(() => {
+                    window.location.href = chromeScheme;
+                }, 500);
             };
         }
         
