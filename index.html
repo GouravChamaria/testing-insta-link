@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Experience Tester</title>
+    
+    <!-- Meta tags for SEO and Social Sharing -->
+    <meta name="description" content="Test and verify browser behavior for Instagram bio links.">
+    <meta property="og:title" content="Link Experience Tester">
+    <meta property="og:description" content="A tool to test external browser redirection from Instagram.">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <main class="container">
+        <div class="card glass-effect">
+            <div class="icon-container" id="browserIcon">
+                <!-- Icon injected by JS -->
+            </div>
+            
+            <h1 class="title" id="statusTitle">Checking Environment...</h1>
+            <p class="description" id="statusDescription">
+                Analyzing your browser environment to determine the best viewing experience.
+            </p>
+
+            <div class="action-area" id="actionArea">
+                <!-- Dynamic buttons/actions -->
+                <div class="loader"></div>
+            </div>
+
+            <div class="tech-info glass-effect-subtle">
+                <span class="label">User Agent:</span>
+                <code id="uaString">Loading...</code>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
