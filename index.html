@@ -3,20 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Experience Tester</title>
+    <title>App Experience</title>
     
-    <!-- Meta tags for SEO and Social Sharing -->
-    <meta name="description" content="Test and verify browser behavior for Instagram bio links.">
-    <meta property="og:title" content="Link Experience Tester">
-    <meta property="og:description" content="A tool to test external browser redirection from Instagram.">
+    <meta name="description" content="Seamless browsing experience.">
+    <meta property="og:title" content="App Experience">
+    <meta property="og:description" content="View this content in its best format.">
     <meta property="og:type" content="website">
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-    <!-- Styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -28,23 +24,24 @@
 
     <main class="container">
         <div class="card glass-effect">
-            <div class="icon-container" id="browserIcon">
-                <!-- Icon injected by JS -->
+            <div class="logo-area">
+                <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                </svg>
             </div>
             
-            <h1 class="title" id="statusTitle">Checking Environment...</h1>
-            <p class="description" id="statusDescription">
-                Analyzing your browser environment to determine the best viewing experience.
+            <h1 class="title">Open in Browser</h1>
+            <p class="subtitle">
+                For the best experience, safety, and performance, we recommend viewing this in your system browser.
             </p>
 
-            <div class="action-area" id="actionArea">
-                <!-- Dynamic buttons/actions -->
-                <div class="loader"></div>
-            </div>
-
-            <div class="tech-info glass-effect-subtle">
-                <span class="label">User Agent:</span>
-                <code id="uaString">Loading...</code>
+            <a href="#" id="launchBtn" class="btn-primary">
+                <span id="btnText">Launch Now</span>
+                <div id="loader" class="loader-ring"></div>
+            </a>
+            
+            <div class="footer">
+                Secure Redirection • Fast & Optimized
             </div>
         </div>
     </main>
