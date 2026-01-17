@@ -1,82 +1,96 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Utility to detect if we are in an In-App Browser (Instagram, FB, etc.)
+function isInAppBrowser() {
     const ua = navigator.userAgent || navigator.vendor || window.opera;
-    const isInstagram = ua.indexOf('Instagram') > -1;
-    const isFacebook = ua.indexOf('FBAN') > -1 || ua.indexOf('FBAV') > -1;
-    const isAndroid = /android/i.test(ua);
-    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    // Instagram specific check, but we can add others like FBAN, FBAV (Facebook)
+    return (ua.indexOf("Instagram") > -1) || (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
+}
 
-    const btn = document.getElementById('launchBtn');
-    const btnText = document.getElementById('btnText');
-    const loader = document.getElementById('loader');
+function getMobileOS() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    if (/android/i.test(ua)) {
+        return "Android";
+    }
+    // iOS detection from: http://stackoverflow.com/a/9039885/177710
+    if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+        return "iOS";
+    }
+    return "unknown";
+}
 
-    // Current URL (or fallback to a specific landing page if needed)
+document.addEventListener("DOMContentLoaded", () => {
+    const overlay = document.getElementById('iab-overlay');
+    const breakoutBtn = document.getElementById('breakout-btn');
     const currentUrl = window.location.href;
-    const cleanUrl = currentUrl.replace(/https?:\/\//, '');
 
-    if (isInstagram || isFacebook) {
-        // Attempt Native Redirects immediately
-        if (isAndroid) {
-            // Android Intent Scheme
-            // Tries to open Chrome, falls back to browser
-            const intentUrl = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end`;
-            // Alternative generic browser intent if specific package fails (less common to specific in JS, usually OS handles)
+    // Check if we are in an In-App Browser
+    if (isInAppBrowser()) {
+        console.log("IAB Detected");
+        
+        // Show the overlay immediately
+        overlay.classList.add('visible');
+
+        const os = getMobileOS();
+
+        if (os === "Android") {
+            // Android Strategy: Intent Scheme
+            // chrome://view-http-date/ is one way, but intent:// is more standard
+            // We want to open chrome with the current URL
             
-            triggerRedirect(intentUrl);
-        } else if (isIOS) {
-            // iOS Chrome Scheme
-            // Tries to open googlechrome:// which triggers system prompt
-            const chromeUrl = `googlechromes://${cleanUrl}`;
+            // Format: intent://<url>#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=<url>;end
+            // We strip the https:// from the start for the intent host part if needed, 
+            // but standard intent scheme usually takes the full url as path or encoded.
             
-            // Note: iOS is stricter. This might prompt "Open in Chrome?". 
-            // If Chrome isn't installed, nothing happens.
-            // We can try it, but rely on the button as backup.
-            triggerRedirect(chromeUrl);
-        }
-    }
+            // Simpler Intent approach for "Open in ANY browser":
+            // intent:<url>#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end
+            
+            // cleaning the protocol for the host part isn't strictly necessary if we use full structure
+            // But let's use the robust method:
+            
+            const cleanUrl = currentUrl.replace(/^https?:\/\//, '');
+            const scheme = currentUrl.startsWith('http:') ? 'http' : 'https';
+            
+            // This intent tries to open in Chrome specifically, falling back to default browser
+            const intentUrl = `intent://${cleanUrl}#Intent;scheme=${scheme};package=com.android.chrome;end`;
+            
+            // Generalized Browser Intent (if specific package fails or we want user choice)
+            // const intentUrlGeneral = `intent://${cleanUrl}#Intent;scheme=${scheme};action=android.intent.action.VIEW;end`;
 
-    // Button Click Handler (Fallback)
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        setLoading(true);
-
-        if (isAndroid) {
-             const intentUrl = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end`;
-             window.location.href = intentUrl;
-        } else if (isIOS) {
-            // Force external by opening a new window? 
-            // Instagram blocks window.open usually. 
-            // Try Chrome Scheme again or standard link.
-             const chromeUrl = `googlechromes://${cleanUrl}`;
-             window.location.href = chromeUrl;
-             
-             // Also try standard safari fallback after short delay?
-             setTimeout(() => {
-                 window.location.href = currentUrl; // Reloads basically, but sometimes triggers logic
-             }, 500);
+            // Auto-redirect attempt
+            window.location.href = intentUrl;
+            
+            // Fallback button click
+            breakoutBtn.onclick = () => {
+                window.location.href = intentUrl;
+            };
+            
+        } else if (os === "iOS") {
+            // iOS Strategy: 
+            // Apple blocks most automatic redirects. 
+            // googlechrome:// is a known scheme.
+            
+            const cleanUrl = currentUrl.replace(/^https?:\/\//, '');
+            const chromeScheme = `googlechrome://${cleanUrl}`;
+            const safariScheme = `x-safari-${currentUrl}`; // Sometimes works for basic shortcuts
+            
+            // We can Try to redirect to chrome if installed
+            // But usually this fails silently or prompts.
+            // Best UX is to tell them to use the menu, but we can attach a "Try Open" button
+            
+            breakoutBtn.innerHTML = "Open in Chrome (if installed)";
+            breakoutBtn.onclick = () => {
+                window.location.href = chromeScheme;
+            };
+            
         } else {
-            // Desktop or standard
-            window.location.href = currentUrl;
+            // Generic fallback
+            breakoutBtn.onclick = () => {
+                window.open(currentUrl, '_system');
+            };
         }
-
-        setTimeout(() => setLoading(false), 2000);
-    });
-
-    function triggerRedirect(url) {
-        // Create a hidden link and click it logic often works better than window.location
-        // But for intents, window.location is standard.
-        // We'll try a timeout to allow the page to render first.
-        setTimeout(() => {
-            window.location.href = url;
-        }, 500); // 500ms delay to let user see "Redirecting..." if we wanted
-    }
-
-    function setLoading(isLoading) {
-        if (isLoading) {
-            btnText.style.display = 'none';
-            loader.style.display = 'block';
-        } else {
-            btnText.style.display = 'block';
-            loader.style.display = 'none';
-        }
+        
+    } else {
+        console.log("External Browser Detected");
+        // Ensure overlay is hidden
+        overlay.classList.remove('visible');
     }
 });

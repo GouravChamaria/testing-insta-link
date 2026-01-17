@@ -3,48 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Experience</title>
-    
-    <meta name="description" content="Seamless browsing experience.">
-    <meta property="og:title" content="App Experience">
-    <meta property="og:description" content="View this content in its best format.">
-    <meta property="og:type" content="website">
-
+    <title>Hello Universe</title>
+    <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="background-blobs">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
+
+    <!-- Main Application Content -->
+    <div class="container">
+        <h1>Hello World</h1>
+        <p class="subtitle">Experience the open web.</p>
+        
+        <div class="status">
+            <div class="status-dot"></div>
+            <span>External Browser Active</span>
+        </div>
     </div>
 
-    <main class="container">
-        <div class="card glass-effect">
-            <div class="logo-area">
-                <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                </svg>
-            </div>
+    <!-- In-App Browser Breakout Overlay -->
+    <div id="iab-overlay">
+        <div class="overlay-content">
+            <div class="overlay-icon">🚀</div>
+            <h2 class="overlay-title">Open in Browser</h2>
+            <p class="overlay-text">For the best experience, please open this page in your system browser.</p>
             
-            <h1 class="title">Open in Browser</h1>
-            <p class="subtitle">
-                For the best experience, safety, and performance, we recommend viewing this in your system browser.
+            <!-- This button acts as a fallback or a direct trigger depending on OS -->
+            <button id="breakout-btn" class="action-btn">
+                Open External <span class="arrow-anim">→</span>
+            </button>
+            
+            <p style="margin-top: 1rem; font-size: 0.8rem; opacity: 0.6;">
+                iOS: Tap <strong>···</strong> and select <br>"Open in external browser"
             </p>
-
-            <a href="#" id="launchBtn" class="btn-primary">
-                <span id="btnText">Launch Now</span>
-                <div id="loader" class="loader-ring"></div>
-            </a>
-            
-            <div class="footer">
-                Secure Redirection • Fast & Optimized
-            </div>
         </div>
-    </main>
+    </div>
 
     <script src="script.js"></script>
 </body>
