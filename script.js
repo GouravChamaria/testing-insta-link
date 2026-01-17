@@ -54,30 +54,40 @@ document.addEventListener("DOMContentLoaded", () => {
             };
             
         } else {
-            // iOS & Others Strategy
-            // Apple blocks automatic redirects to other apps from WebViews usually.
-            // We can try valid schemes, but the Overlay instruction is key.
+            // iOS Strategy: Automatic Breakout
+            // mimic the Android "popup" behavior by triggering specific schemes
+            // 'x-safari-https://' usually triggers a system prompt "Open in Safari?" on newer iOS
+            // 'googlechrome://' triggers "Open in Chrome?"
             
-            // Try to open in a new window context which sometimes breaks out or prompts
+            const targetNoPh = currentUrl.replace(/^https?:\/\//, '');
+            const safariScheme = `x-safari-https://${targetNoPh}`;
+            const chromeScheme = `googlechrome://${targetNoPh}`;
+            const firefoxScheme = `firefox://open-url?url=${currentUrl}`;
+            
+            // 1. Immediate Attempt: x-safari-https
+            // This is the cleanest "System Browser" attempt
+            window.location.href = safariScheme;
+            
+            // Button Fallback: Chain attempts
+            // We give the user the "Open in System Browser" button which tries Safari first, then generic
             breakoutBtn.innerHTML = "Open in System Browser";
             
             breakoutBtn.onclick = (e) => {
                 e.preventDefault();
-                // 1. Try generic window.open (basic attempt)
-                window.open(currentUrl, '_system');
                 
-                // 2. Refresh prompt logic - sometimes reloading helps signal the intent
-                // But mainly we rely on the user following the arrow to the menu.
+                // Try Safari Scheme again
+                window.location.href = safariScheme;
                 
-                // Optional: Attempt Chrome scheme as a 'nice to have' if they clicked the button
-                // but don't force it automatically on load to avoid error dialogs.
-                const cleanUrl = currentUrl.replace(/^https?:\/\//, '');
-                const chromeScheme = `googlechrome://${cleanUrl}`;
-                
-                // We utilize a small timeout to try chrome, then fallback
+                // Fallback sequence if Safari scheme is unsupported/fails (short timeout)
                 setTimeout(() => {
+                    // Try Chrome
                     window.location.href = chromeScheme;
                 }, 500);
+
+                 setTimeout(() => {
+                    // Finally standard new window as last resort
+                    window.open(currentUrl, '_system');
+                }, 1000);
             };
         }
         
